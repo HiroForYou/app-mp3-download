@@ -48,3 +48,8 @@ expo-env.d.ts
 # Build output
 build/
 out/
+
+# Local-only files (kept on disk, not tracked)
+skills-lock.json
+.help
+download-base-mp3.js
