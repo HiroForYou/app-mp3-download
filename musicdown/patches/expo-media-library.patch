@@ -1,0 +1,20 @@
+diff --git a/android/src/main/java/expo/modules/medialibrary/next/permissions/SystemPermissionsDelegate.kt b/android/src/main/java/expo/modules/medialibrary/next/permissions/SystemPermissionsDelegate.kt
+index d40107a340b2508e7446288150ed22b908c41f3c..3711227e59622bbce80f69af22563810433f4e65 100644
+--- a/android/src/main/java/expo/modules/medialibrary/next/permissions/SystemPermissionsDelegate.kt
++++ b/android/src/main/java/expo/modules/medialibrary/next/permissions/SystemPermissionsDelegate.kt
+@@ -37,7 +37,14 @@ class SystemPermissionsDelegate(private val appContext: AppContext) {
+       isWriteExternalStorageNotDeprecated() && isWritePermissionNeeded -> listOf(WRITE_EXTERNAL_STORAGE)
+       isGranularPermissionsIntroduced() -> buildList {
+         addAll(allowedPermissionsList.map { it.toManifestPermission() })
+-        if (isSelectivePermissionsIntroduced()) add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
++        // Patched: READ_MEDIA_VISUAL_USER_SELECTED can only ever be granted via the
++        // photo/video partial-access picker flow — requiring it for audio-only apps
++        // (which never request PHOTO/VIDEO permissions) makes every write/delete
++        // operation permanently fail on Android 14+. Only require it when this app
++        // actually declares PHOTO or VIDEO permissions.
++        if (isSelectivePermissionsIntroduced() && allowedPermissionsList.any { it != GranularPermission.AUDIO }) {
++          add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
++        }
+       }
+       else -> listOf(READ_EXTERNAL_STORAGE)
+     }

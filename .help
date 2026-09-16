@@ -1,0 +1,3 @@
+npx eas-cli build --profile development --platform android
+
+npx expo start --dev-client
