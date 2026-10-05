@@ -29,7 +29,7 @@ cp .env.example .env   # configurar API_KEY
 node --env-file=.env server.js
 ```
 
-Detalle de endpoints, variables de entorno y despliegue con Docker: [server/README.md](server/README.md).
+Detalle de endpoints, variables de entorno y despliegue con Docker: [server/README.es.md](server/README.es.md).
 
 ### App móvil
 

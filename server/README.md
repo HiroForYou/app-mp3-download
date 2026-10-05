@@ -1,56 +1,57 @@
 # musicdown-server
 
-Small Express server that converts a YouTube (or other yt-dlp-supported) link
-to a real MP3 stream, so the MusicDown app doesn't need to do this on-device
-(mobile apps can't run ffmpeg/yt-dlp reliably — see the root README for why).
+**English** · [Español](README.es.md)
 
-It pipes `yt-dlp` (best audio stream) straight into `ffmpeg` (encodes to
-192kbps MP3) and streams the result back as the HTTP response body. It also
-exposes a metadata endpoint so the app can prefill title/artist/thumbnail
-before the actual download starts.
+Express server that converts a YouTube link (or any other site supported by yt-dlp) into an MP3 stream for the MusicDown app. Conversion runs on the server because mobile apps cannot run `ffmpeg` or `yt-dlp` reliably.
+
+| Stage | Tool | Output |
+|---|---|---|
+| Download | `yt-dlp` (best audio stream) | Audio piped to `ffmpeg` |
+| Encoding | `ffmpeg` | 192 kbps MP3 |
+| Response | Express | MP3 streamed as the HTTP response body |
 
 ## Endpoints
 
-- `GET /api/health` — `{ ok: true }`, no auth required. Used by the app's
-  "Probar conexión" button.
-- `GET /api/metadata?url=<video_url>` — `{ title, artist, thumbnail, duration }`
-  extracted via `yt-dlp -j` (no download).
-- `GET /api/convert?url=<video_url>&filename=<hint>` — streams back an
-  `audio/mpeg` response with `Content-Disposition: attachment`.
+| Method and path | Auth | Response |
+|---|---|---|
+| `GET /api/health` | No | `{ ok: true }`. Used by the connection test in the app settings. |
+| `GET /api/metadata?url=<video_url>` | `x-api-key` | `{ title, artist, thumbnail, duration }`, read with `yt-dlp -j` (no download) |
+| `GET /api/convert?url=<video_url>&filename=<hint>` | `x-api-key` | `audio/mpeg` stream with `Content-Disposition: attachment` |
 
-Both `/api/metadata` and `/api/convert` require the `x-api-key` header when
-`API_KEY` is set (strongly recommended once deployed publicly — see below).
+The `x-api-key` header is checked only when `API_KEY` is set.
+
+## Environment variables
+
+| Variable | Default | Use |
+|---|---|---|
+| `PORT` | `3000` | HTTP port |
+| `API_KEY` | (empty: no auth) | Value required in the `x-api-key` header |
+| `YTDLP_PATH` | `yt-dlp` | Path to the `yt-dlp` binary |
+| `FFMPEG_PATH` | `ffmpeg` | Path to the `ffmpeg` binary |
 
 ## Running locally
 
 ```bash
 npm install
-cp .env.example .env   # edit API_KEY
+cp .env.example .env   # set API_KEY
 node --env-file=.env server.js
 ```
 
-Requires `yt-dlp` and `ffmpeg` on your `PATH` (or set `YTDLP_PATH` /
-`FFMPEG_PATH` env vars to point at them).
+Requires `yt-dlp` and `ffmpeg` on `PATH`, or `YTDLP_PATH` / `FFMPEG_PATH` pointing to them.
 
-## Deploying (Docker)
+## Deployment (Docker)
 
 ```bash
 docker build -t musicdown-server .
 docker run -p 3000:3000 -e API_KEY=your-long-random-string musicdown-server
 ```
 
-Deploy the image to any container host (Railway, Render, Fly.io, a VPS with
-Docker, etc.) and point the app's Settings screen at the resulting public
-URL + the same `API_KEY`.
+The image runs on any container host (Railway, Render, Fly.io, a VPS with Docker). In the app settings, set the public URL and the same `API_KEY`.
 
-## Important
+## Operating notes
 
-- **Always set `API_KEY` in production.** Without it, anyone who discovers
-  the server's URL can use it to convert arbitrary videos on your
-  bandwidth/compute — this server does not rate-limit or otherwise restrict
-  usage beyond the API key check.
-- **Personal/self-hosted use only.** Downloading audio from YouTube may
-  violate YouTube's Terms of Service depending on the content and your
-  jurisdiction. This server is meant for your own private use (e.g. content
-  you own, Creative Commons/public-domain audio) — don't expose it as a
-  public service for others.
+| # | Point |
+|---|---|
+| 1 | Set `API_KEY` in production. Without it, anyone with the URL can convert videos using the server's bandwidth and compute. |
+| 2 | No rate limiting. The API key is the only access control. |
+| 3 | Personal, self-hosted use only (e.g. content you own, Creative Commons or public-domain audio). Downloading audio from YouTube may violate its Terms of Service depending on content and jurisdiction. Do not expose the server as a public service. |
