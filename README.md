@@ -1,35 +1,37 @@
 # app-mp3-download
 
-Monorepo con dos componentes: un servidor Express que convierte enlaces de YouTube a MP3, y una app móvil (Expo/React Native) que consume ese servidor para descargar y gestionar música.
+**English** · [Español](README.es.md)
 
-## Estructura
+Monorepo with two components: an Express server that converts YouTube links to MP3, and a mobile app (Expo/React Native) that uses that server to download and manage music.
 
-| Carpeta | Descripción | Stack |
+## Structure
+
+| Folder | Description | Stack |
 |---|---|---|
-| `server/` | API que convierte video a MP3 vía `yt-dlp` + `ffmpeg` | Node.js, Express |
-| `musicdown/` | App móvil cliente del servidor | Expo, React Native, NativeWind |
+| `server/` | API that converts video to MP3 via `yt-dlp` + `ffmpeg` | Node.js, Express |
+| `musicdown/` | Mobile client app for the server | Expo, React Native, NativeWind |
 
-## Requisitos
+## Requirements
 
-| Componente | Requisito |
+| Component | Requirement |
 |---|---|
-| `server/` | Node.js, `yt-dlp` y `ffmpeg` disponibles en `PATH` |
+| `server/` | Node.js, with `yt-dlp` and `ffmpeg` available on `PATH` |
 | `musicdown/` | Node.js, pnpm, Expo CLI |
 
-## Puesta en marcha
+## Getting started
 
-### Servidor
+### Server
 
 ```bash
 cd server
 npm install
-cp .env.example .env   # configurar API_KEY
+cp .env.example .env   # set API_KEY
 node --env-file=.env server.js
 ```
 
-Detalle de endpoints, variables de entorno y despliegue con Docker: [server/README.md](server/README.md).
+Endpoints, environment variables and Docker deployment: [server/README.md](server/README.md).
 
-### App móvil
+### Mobile app
 
 ```bash
 cd musicdown
@@ -37,12 +39,12 @@ pnpm install
 npx expo start --dev-client
 ```
 
-Build de desarrollo para Android:
+Android development build:
 
 ```bash
 npx eas-cli build --profile development --platform android
 ```
 
-## Aviso legal
+## Legal notice
 
-Uso personal y autohospedado. Descargar audio de YouTube puede infringir sus Términos de Servicio según el contenido y la jurisdicción. No exponer el servidor como servicio público para terceros.
+For personal, self-hosted use. Downloading audio from YouTube may violate its Terms of Service depending on the content and jurisdiction. Do not expose the server as a public service for third parties.
